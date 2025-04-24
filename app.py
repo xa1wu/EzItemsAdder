@@ -3,6 +3,7 @@ from customtkinter import *
 from tkinter import filedialog
 from generator.font_generator import FontImageGenerator
 from generator.item_generator import ItemGenerator
+from generator.categories_generator import CategoriesGenerator  # Import CategoriesGenerator
 from generator.utils import get_image_files
 
 class App(CTk):
@@ -22,7 +23,7 @@ class App(CTk):
     def init_ui(self):
         # Dropdown เลือกประเภท
         CTkLabel(self, text="Select Generator Type:").pack(pady=10)
-        CTkOptionMenu(self, values=["Font Image", "Item"], variable=self.generator_type, command=self.on_type_change).pack()
+        CTkOptionMenu(self, values=["Font Image", "Item", "Category"], variable=self.generator_type, command=self.on_type_change).pack() # เพิ่ม "Category"
 
         # ปุ่มเลือกโฟลเดอร์
         CTkButton(self, text="Select Folder", command=self.select_folder,corner_radius=32, hover_color="#C850C0").pack(pady=10)
@@ -48,8 +49,10 @@ class App(CTk):
 
         if value == "Font Image":
             self.render_font_ui()
-        else:
+        elif value == "Item":
             self.render_item_ui()
+        elif value == "Category":  # เพิ่มเงื่อนไขสำหรับ Category
+            self.render_category_ui()
 
     def render_font_ui(self):
         self.input_fields['namespace'] = self.create_input("Namespace")
@@ -64,6 +67,11 @@ class App(CTk):
         self.input_fields['model_id_start'] = self.create_input("Start Model ID", default="10000")
         self.input_fields['model_path_prefix'] = self.create_input("Model Path Prefix (e.g. folder1/item_)")
 
+    def render_category_ui(self):
+        self.input_fields['namespace'] = self.create_input("Namespace")
+        self.input_fields['category_name'] = self.create_input("Category Name", default="&eNew Category")
+        self.input_fields['category_title'] = self.create_input("Category Title")
+        self.input_fields['category_icon'] = self.create_input("Category Icon (namespace:item_id)", default="namespace:icon")
     def create_input(self, label, default=""):
         CTkLabel(self.dynamic_frame, text=label).pack(anchor="w", padx=10)
         entry = CTkEntry(self.dynamic_frame)
@@ -102,13 +110,22 @@ class App(CTk):
                     show_gui=self.input_fields['show_gui'].get()
                 )
                 code = gen.generate()
-            else:
+            elif generator_type == "Item":
                 gen = ItemGenerator(
                     files=files,
                     namespace=self.input_fields['namespace'].get(),
                     model_id_start=self.input_fields['model_id_start'].get(),
                     model_path_prefix=self.input_fields['model_path_prefix'].get(),
                     material=self.input_fields['material'].get()
+                )
+                code = gen.generate()
+            elif generator_type == "Category": # เพิ่มเงื่อนไขสำหรับ Category
+                gen = CategoriesGenerator(
+                    files=files,
+                    namespace=self.input_fields['namespace'].get(),
+                    category_name=self.input_fields['category_name'].get(),
+                    category_title=self.input_fields['category_title'].get(),
+                    category_icon=self.input_fields['category_icon'].get()
                 )
                 code = gen.generate()
 
