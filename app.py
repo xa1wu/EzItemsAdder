@@ -3,7 +3,7 @@ from customtkinter import *
 from tkinter import filedialog
 from generator.font_generator import FontImageGenerator
 from generator.item_generator import ItemGenerator
-from generator.categories_generator import CategoriesGenerator  # Import CategoriesGenerator
+from generator.categories_generator import CategoriesGenerator
 from generator.utils import get_image_files
 
 class App(CTk):
@@ -23,7 +23,7 @@ class App(CTk):
     def init_ui(self):
         # Dropdown เลือกประเภท
         CTkLabel(self, text="Select Generator Type:").pack(pady=10)
-        CTkOptionMenu(self, values=["Font Image", "Item", "Category"], variable=self.generator_type, command=self.on_type_change).pack() # เพิ่ม "Category"
+        CTkOptionMenu(self, values=["Font Image", "Item", "Category"], variable=self.generator_type, command=self.on_type_change).pack()
 
         # ปุ่มเลือกโฟลเดอร์
         CTkButton(self, text="Select Folder", command=self.select_folder,corner_radius=32, hover_color="#C850C0").pack(pady=10)
@@ -51,7 +51,7 @@ class App(CTk):
             self.render_font_ui()
         elif value == "Item":
             self.render_item_ui()
-        elif value == "Category":  # เพิ่มเงื่อนไขสำหรับ Category
+        elif value == "Category":
             self.render_category_ui()
 
     def render_font_ui(self):
@@ -72,6 +72,7 @@ class App(CTk):
         self.input_fields['category_name'] = self.create_input("Category Name", default="&eNew Category")
         self.input_fields['category_title'] = self.create_input("Category Title")
         self.input_fields['category_icon'] = self.create_input("Category Icon (namespace:item_id)", default="namespace:icon")
+
     def create_input(self, label, default=""):
         CTkLabel(self.dynamic_frame, text=label).pack(anchor="w", padx=10)
         entry = CTkEntry(self.dynamic_frame)
@@ -111,15 +112,22 @@ class App(CTk):
                 )
                 code = gen.generate()
             elif generator_type == "Item":
+                try:
+                    model_id_start_value = int(self.input_fields['model_id_start'].get())
+                except ValueError:
+                    self.output_box.delete("1.0", "end")
+                    self.output_box.insert("end", "Error: 'Start Model ID' must be a number.")
+                    return
+
                 gen = ItemGenerator(
                     files=files,
                     namespace=self.input_fields['namespace'].get(),
-                    model_id_start=self.input_fields['model_id_start'].get(),
+                    model_id_start=model_id_start_value,
                     model_path_prefix=self.input_fields['model_path_prefix'].get(),
                     material=self.input_fields['material'].get()
                 )
                 code = gen.generate()
-            elif generator_type == "Category": # เพิ่มเงื่อนไขสำหรับ Category
+            elif generator_type == "Category":
                 gen = CategoriesGenerator(
                     files=files,
                     namespace=self.input_fields['namespace'].get(),

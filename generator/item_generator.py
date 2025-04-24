@@ -17,7 +17,7 @@ class ItemGenerator:
             output += f"    display_name: {name}\n"
             output += f"    resource:\n"
             output += f"      material: {self.material}\n"
-            output += f"      model_id: {model_id}\n"
+            output += f"      model_id: {str(model_id)}\n"
             output += f"      generate: false\n"
             output += f"      model_path: {self.model_path_prefix}{name}\n"
         return output
