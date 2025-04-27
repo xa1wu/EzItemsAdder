@@ -2,7 +2,8 @@
 from customtkinter import *
 from tkinter import filedialog
 from generator.font_generator import FontImageGenerator
-from generator.item_generator import ItemGenerator
+from generator.models_generator import ModelsGenerator
+from generator.textures_generator import TexturesGenerator
 from generator.categories_generator import CategoriesGenerator
 from generator.utils import get_image_files
 
@@ -23,7 +24,7 @@ class App(CTk):
     def init_ui(self):
         # Dropdown เลือกประเภท
         CTkLabel(self, text="Select Generator Type:").pack(pady=10)
-        CTkOptionMenu(self, values=["Font Image", "Item", "Category"], variable=self.generator_type, command=self.on_type_change).pack()
+        CTkOptionMenu(self, values=["Font Image", "Models", "Textures", "Category"], variable=self.generator_type, command=self.on_type_change).pack()
 
         # ปุ่มเลือกโฟลเดอร์
         CTkButton(self, text="Select Folder", command=self.select_folder,corner_radius=32, hover_color="#C850C0").pack(pady=10)
@@ -49,8 +50,10 @@ class App(CTk):
 
         if value == "Font Image":
             self.render_font_ui()
-        elif value == "Item":
-            self.render_item_ui()
+        elif value == "Models":
+            self.render_models_ui()
+        elif value == "Textures":
+            self.render_textures_ui()
         elif value == "Category":
             self.render_category_ui()
 
@@ -61,11 +64,18 @@ class App(CTk):
         self.input_fields['ypos'] = self.create_input("Y Position", default="8")
         self.input_fields['show_gui'] = self.create_input("Show in GUI (true/false)", default="true")
 
-    def render_item_ui(self):
+    def render_models_ui(self):
         self.input_fields['namespace'] = self.create_input("Namespace")
         self.input_fields['material'] = self.create_input("Material", default="PAPER")
         self.input_fields['model_id_start'] = self.create_input("Start Model ID", default="10000")
         self.input_fields['model_path_prefix'] = self.create_input("Model Path Prefix (e.g. folder1/item_)")
+
+    def render_textures_ui(self):
+        self.input_fields['namespace'] = self.create_input("Namespace")
+        self.input_fields['material'] = self.create_input("Material", default="PAPER")
+        self.input_fields['model_id_start'] = self.create_input("Start Model ID", default="10000")
+        self.input_fields['textures_path_prefix'] = self.create_input("Textures Path Prefix (e.g. folder1/item_)")
+
 
     def render_category_ui(self):
         self.input_fields['namespace'] = self.create_input("Namespace")
@@ -111,7 +121,7 @@ class App(CTk):
                     show_gui=self.input_fields['show_gui'].get()
                 )
                 code = gen.generate()
-            elif generator_type == "Item":
+            elif generator_type == "Models":
                 try:
                     model_id_start_value = int(self.input_fields['model_id_start'].get())
                 except ValueError:
@@ -119,11 +129,27 @@ class App(CTk):
                     self.output_box.insert("end", "Error: 'Start Model ID' must be a number.")
                     return
 
-                gen = ItemGenerator(
+                gen = ModelsGenerator(
                     files=files,
                     namespace=self.input_fields['namespace'].get(),
                     model_id_start=model_id_start_value,
                     model_path_prefix=self.input_fields['model_path_prefix'].get(),
+                    material=self.input_fields['material'].get()
+                )
+                code = gen.generate()
+            elif generator_type == "Textures":
+                try:
+                    model_id_start_value = int(self.input_fields['model_id_start'].get())
+                except ValueError:
+                    self.output_box.delete("1.0", "end")
+                    self.output_box.insert("end", "Error: 'Start Model ID' must be a number.")
+                    return
+
+                gen = TexturesGenerator(
+                    files=files,
+                    namespace=self.input_fields['namespace'].get(),
+                    model_id_start=model_id_start_value,
+                    textures_path_prefix=self.input_fields['textures_path_prefix'].get(),
                     material=self.input_fields['material'].get()
                 )
                 code = gen.generate()
@@ -146,7 +172,7 @@ class App(CTk):
 
 
 if __name__ == "__main__":
-    set_appearance_mode("Dark")  # หรือ "Light"
-    set_default_color_theme("blue")  # เปลี่ยนได้ตามต้องการ
+    set_appearance_mode("System")  # หรือ "Light"
+    set_default_color_theme("green")  # เปลี่ยนได้ตามต้องการ
     app = App()
     app.mainloop()
